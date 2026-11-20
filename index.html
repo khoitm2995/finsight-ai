@@ -321,8 +321,8 @@
                             <span id="chart-asset-category" class="px-2 py-0.5 rounded-md text-[11px] bg-slate-800 text-slate-300">Tiền ảo</span>
                         </div>
                         <div class="flex flex-wrap items-center gap-4 text-xs text-slate-400 mt-1.5 font-mono">
-                            <span>Hỗ trợ: <strong id="chart-support-val" class="text-emerald-400">$89,500</strong></span>
-                            <span>Kháng cự: <strong id="chart-resistance-val" class="text-rose-400">$98,800</strong></span>
+                            <span>Hỗ trợ (Đáy an toàn): <strong id="chart-support-val" class="text-emerald-400">$89,500</strong></span>
+                            <span>Kháng cự (Trần chốt lời): <strong id="chart-resistance-val" class="text-rose-400">$98,800</strong></span>
                         </div>
                     </div>
 
@@ -343,33 +343,46 @@
                 <!-- Chart Legend Pills -->
                 <div class="flex flex-wrap items-center gap-4 text-xs text-slate-300">
                     <span class="flex items-center gap-1.5">
-                        <span class="w-3 h-0.5 bg-brand-400 inline-block"></span> Diễn biến lịch sử
+                        <span class="w-3 h-0.5 bg-brand-400 inline-block"></span> Diễn biến quá khứ (Trái)
                     </span>
                     <span class="flex items-center gap-1.5">
-                        <span class="w-3 h-0.5 border-t-2 border-dashed border-purple-400 inline-block"></span> Đường dự phóng AI
+                        <span class="w-3 h-0.5 border-t-2 border-dashed border-purple-400 inline-block"></span> AI Dự báo tương lai (Phải)
                     </span>
                     <span class="flex items-center gap-1.5">
-                        <span class="w-3 h-3 rounded bg-purple-500/20 border border-purple-500/40 inline-block"></span> Vùng tin cậy 90%
+                        <span class="w-3 h-3 rounded bg-purple-500/20 border border-purple-500/40 inline-block"></span> Vùng dao động 90%
                     </span>
                 </div>
 
                 <!-- Responsive Chart Container -->
-                <div class="relative w-full h-[290px] sm:h-[330px]">
+                <div class="relative w-full h-[270px] sm:h-[300px]">
                     <canvas id="marketForecastChart"></canvas>
+                </div>
+
+                <!-- Plain-Language Chart Guide Box (Diễn giải sơ đồ dễ hiểu) -->
+                <div class="bg-slate-900/90 border border-slate-800/90 rounded-xl p-3.5 text-xs space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="font-bold text-brand-400 flex items-center gap-1.5">
+                            <i class="fa-solid fa-circle-info"></i> Cách đọc biểu đồ nhanh & Diễn giải xu hướng AI:
+                        </span>
+                        <span id="chart-axis-guide-tag" class="text-[11px] font-mono text-slate-400">Trục ngang: Thời gian • Trục dọc: Mức giá</span>
+                    </div>
+                    <p id="chart-plain-explanation" class="text-slate-300 leading-relaxed">
+                        Nửa bên trái (<strong class="text-sky-400">đường xanh liền</strong>) là giá đã đi qua trong 6 ngày gần nhất tới điểm <strong class="text-white">Hiện tại</strong>. Nửa bên phải (<strong class="text-purple-300">đường tím nét đứt</strong>) là hướng đi AI dự phóng cho 6 ngày tới, nằm gọn trong <strong class="text-purple-200">dải bóng mờ</strong> (vùng giá có 90% khả năng dao động).
+                    </p>
                 </div>
 
                 <!-- Technical Indicators Footer Strip -->
                 <div class="grid grid-cols-3 gap-2.5 pt-2 border-t border-slate-800/80 text-xs">
                     <div class="bg-slate-900/80 rounded-xl p-2.5 border border-slate-800/80">
-                        <div class="text-slate-400 text-[11px]">Chỉ báo RSI (14)</div>
+                        <div class="text-slate-400 text-[11px]">Sức mạnh giá (RSI 14)</div>
                         <div id="tech-rsi" class="font-mono font-semibold text-white mt-0.5">61.4 (Trung tính-Tăng)</div>
                     </div>
                     <div class="bg-slate-900/80 rounded-xl p-2.5 border border-slate-800/80">
-                        <div class="text-slate-400 text-[11px]">Xu hướng MA</div>
+                        <div class="text-slate-400 text-[11px]">Xu hướng trung bình</div>
                         <div id="tech-ma" class="font-mono font-semibold text-emerald-400 mt-0.5">Trên MA50 & MA200</div>
                     </div>
                     <div class="bg-slate-900/80 rounded-xl p-2.5 border border-slate-800/80">
-                        <div class="text-slate-400 text-[11px]">Biến động (ATR)</div>
+                        <div class="text-slate-400 text-[11px]">Biên độ biến động</div>
                         <div id="tech-volatility" class="font-mono font-semibold text-amber-300 mt-0.5">Trung bình - Cao</div>
                     </div>
                 </div>
@@ -1669,6 +1682,42 @@
             }
         }
 
+        function syncAssetHorizonsToLivePrice(asset, newPrice) {
+            if (!asset || !asset.horizons || !newPrice || newPrice <= 0) return;
+            const roundLikeAsset = (val) => {
+                if (detectAssetBaseCurrency(asset) === 'VND' && asset.id !== 'goldsjc' && asset.id !== 'vnindex') {
+                    return Math.round(val / 50) * 50;
+                }
+                if (asset.category === 'bonds') return Number(val.toFixed(2));
+                return Number(val.toFixed(newPrice < 10 ? 4 : 2));
+            };
+
+            ['7d', '1m', '6m'].forEach(hKey => {
+                const h = asset.horizons[hKey];
+                if (!h || !Array.isArray(h.history) || h.history.length === 0) return;
+
+                const oldAnchor = h.history[h.history.length - 1] || newPrice;
+                const jumpRatio = Math.abs(newPrice - oldAnchor) / Math.max(0.0001, oldAnchor);
+
+                // If live spot price differs notably (> 4%) from the old placeholder anchor (e.g. ETH $1,750 vs $3,380),
+                // proportionally rescale the entire history + forecast curve so the chart never forms a sharp artificial V-drop!
+                if (jumpRatio > 0.04) {
+                    const scale = newPrice / oldAnchor;
+                    h.history = h.history.map(v => roundLikeAsset(v * scale));
+                    h.history[h.history.length - 1] = newPrice;
+                    if (Array.isArray(h.forecast)) {
+                        h.forecast = h.forecast.map(v => roundLikeAsset(v * scale));
+                        const endForecast = h.forecast[h.forecast.length - 1];
+                        h.targetFormatted = formatAssetDisplayPrice(asset, endForecast, 'NATIVE');
+                    }
+                    asset.support = formatAssetDisplayPrice(asset, roundLikeAsset(newPrice * 0.94), 'NATIVE');
+                    asset.resistance = formatAssetDisplayPrice(asset, roundLikeAsset(newPrice * 1.07), 'NATIVE');
+                } else {
+                    h.history[h.history.length - 1] = newPrice;
+                }
+            });
+        }
+
         async function executeLiveMarketTick() {
             let binancePrices = {};
             try {
@@ -1733,13 +1782,7 @@
 
                 asset.rawPrice = nextPrice;
                 asset.priceFormatted = formatAssetDisplayPrice(asset, nextPrice, 'NATIVE');
-
-                ['7d', '1m', '6m'].forEach(hKey => {
-                    const hist = asset.horizons[hKey]?.history;
-                    if (Array.isArray(hist) && hist.length > 0) {
-                        hist[hist.length - 1] = nextPrice;
-                    }
-                });
+                syncAssetHorizonsToLivePrice(asset, nextPrice);
             });
 
             const tickTimeEl = document.getElementById('last-tick-time');
@@ -2425,20 +2468,44 @@ Hãy trả lời bằng tiếng Việt rõ ràng, súc tích, có cấu trúc g�
                 changeEl.innerHTML = `<i class="fa-solid ${isPositive ? 'fa-caret-up' : 'fa-caret-down'}"></i> ${isPositive ? '+' : ''}${asset.change24h.toFixed(2)}% (24h)`;
             }
 
+            const lastForecastRaw = horizonData?.forecast?.[horizonData.forecast.length - 1];
+            const kpiTargetEl = document.getElementById('kpi-target-price');
+            if (kpiTargetEl && lastForecastRaw) {
+                kpiTargetEl.textContent = (state.globalCurrency !== 'NATIVE' && asset.category !== 'bonds')
+                    ? formatAssetDisplayPrice(asset, lastForecastRaw)
+                    : horizonData.targetFormatted;
+            }
+            const supEl = document.getElementById('chart-support-val');
+            const resEl = document.getElementById('chart-resistance-val');
+            if (supEl) supEl.textContent = asset.support;
+            if (resEl) resEl.textContent = asset.resistance;
+
             if (state.chartInstance && horizonData) {
                 const histLen = horizonData.history.length;
                 const convertedHist = horizonData.history.map(v => convertChartValue(asset, v));
                 const convertedFore = horizonData.forecast.map(v => convertChartValue(asset, v));
+                const foreSeries = [
+                    ...Array(histLen - 1).fill(null),
+                    convertedHist[histLen - 1],
+                    ...convertedFore
+                ];
+                const bandPct = asset.category === 'crypto' ? 0.032 : (asset.category === 'bonds' ? 0.01 : 0.02);
 
                 state.chartInstance.data.datasets[0].data = [
                     ...convertedHist,
                     ...Array(convertedFore.length).fill(null)
                 ];
-                state.chartInstance.data.datasets[1].data = [
-                    ...Array(histLen - 1).fill(null),
-                    convertedHist[histLen - 1],
-                    ...convertedFore
-                ];
+                state.chartInstance.data.datasets[1].data = foreSeries;
+                state.chartInstance.data.datasets[2].data = foreSeries.map((v, idx) => {
+                    if (v === null) return null;
+                    if (idx === histLen - 1) return v;
+                    return Number((v * (1 + bandPct * Math.sqrt(idx - (histLen - 1)))).toFixed(4));
+                });
+                state.chartInstance.data.datasets[3].data = foreSeries.map((v, idx) => {
+                    if (v === null) return null;
+                    if (idx === histLen - 1) return v;
+                    return Number((v * (1 - bandPct * Math.sqrt(idx - (histLen - 1)))).toFixed(4));
+                });
                 state.chartInstance.update('none');
             }
         }
@@ -2597,6 +2664,26 @@ Hãy trả lời bằng tiếng Việt rõ ràng, súc tích, có cấu trúc g�
             document.getElementById('ai-macro-analysis').textContent = horizonData.macro;
             document.getElementById('ai-scenario-text').innerHTML = horizonData.scenario;
 
+            // Update plain-language chart guide dynamically for the active asset & horizon
+            const plainGuideEl = document.getElementById('chart-plain-explanation');
+            const axisGuideTagEl = document.getElementById('chart-axis-guide-tag');
+            const periodUnitLabel = horizonKey === '7d' ? 'ngày' : (horizonKey === '1m' ? 'tuần' : 'tháng');
+            if (axisGuideTagEl) {
+                axisGuideTagEl.textContent = asset.category === 'bonds'
+                    ? 'Trục ngang: Thời gian • Trục dọc: Lợi suất (%/năm)'
+                    : `Trục ngang: Thời gian (${periodUnitLabel}) • Trục dọc: Giá trị (${state.globalCurrency === 'NATIVE' ? detectAssetBaseCurrency(asset) : state.globalCurrency})`;
+            }
+            if (plainGuideEl) {
+                const currentDisp = formatAssetDisplayPrice(asset);
+                const targetDisp = (state.globalCurrency !== 'NATIVE' && lastForecastRaw && asset.category !== 'bonds')
+                    ? formatAssetDisplayPrice(asset, lastForecastRaw)
+                    : horizonData.targetFormatted;
+                const trendWord = horizonData.bullProb >= 55 ? 'tăng trưởng tích cực' : 'dao động ổn định';
+                plainGuideEl.innerHTML = `
+                    <strong>Diễn giải dễ hiểu cho ${asset.name}:</strong> Nửa bên trái (<span class="text-sky-400 font-semibold">đường xanh liền</span>) thể hiện biến động thực tế các ${periodUnitLabel} vừa qua tính đến mức giá <strong class="text-white">${currentDisp}</strong> hiện tại. Nửa bên phải (<span class="text-purple-300 font-semibold">đường tím nét đứt</span>) là kịch bản AI dự phóng xu hướng <strong class="text-emerald-400">${trendWord}</strong> hướng tới mục tiêu <strong class="text-purple-200">${targetDisp}</strong> (${horizonData.upside}), trong đó vùng bóng mờ màu tím là biên độ an toàn 90%.
+                `;
+            }
+
             updateSelectedAssetIntelAndTradePlan(asset, horizonKey, horizonData);
             recalculateQuickConverter();
             renderForecastChart(asset, horizonKey, horizonData);
@@ -2612,12 +2699,12 @@ Hãy trả lời bằng tiếng Việt rõ ràng, súc tích, có cấu trúc g�
             const histLen = horizonData.history.length;
             const foreLen = horizonData.forecast.length;
 
-            const labelPrefix = horizonKey === '7d' ? 'N-' : (horizonKey === '1m' ? 'T-' : 'Th-');
-            const futurePrefix = horizonKey === '7d' ? 'N+' : (horizonKey === '1m' ? 'T+' : 'Th+');
+            const labelPrefix = horizonKey === '7d' ? 'Ngày -' : (horizonKey === '1m' ? 'Tuần -' : 'Tháng -');
+            const futurePrefix = horizonKey === '7d' ? 'Ngày +' : (horizonKey === '1m' ? 'Tuần +' : 'Tháng +');
 
             const labels = [];
             for (let i = histLen - 1; i >= 1; i--) labels.push(`${labelPrefix}${i}`);
-            labels.push('Hiện tại');
+            labels.push('Hiện tại (Live)');
             for (let i = 1; i <= foreLen; i++) labels.push(`${futurePrefix}${i}`);
 
             const convertedHist = horizonData.history.map(v => convertChartValue(asset, v));
@@ -2626,7 +2713,7 @@ Hãy trả lời bằng tiếng Việt rõ ràng, súc tích, có cấu trúc g�
             const histSeries = [...convertedHist, ...Array(foreLen).fill(null)];
             const foreSeries = [...Array(histLen - 1).fill(null), convertedHist[histLen - 1], ...convertedFore];
 
-            const bandPct = asset.category === 'crypto' ? 0.035 : (asset.category === 'bonds' ? 0.012 : 0.022);
+            const bandPct = asset.category === 'crypto' ? 0.032 : (asset.category === 'bonds' ? 0.01 : 0.02);
             const upperBand = foreSeries.map((v, idx) => {
                 if (v === null) return null;
                 if (idx === histLen - 1) return v;
@@ -2651,44 +2738,46 @@ Hãy trả lời bằng tiếng Việt rõ ràng, súc tích, có cấu trúc g�
                     labels,
                     datasets: [
                         {
-                            label: 'Diễn biến lịch sử',
+                            label: 'Giá lịch sử thực tế',
                             data: histSeries,
                             borderColor: '#38bdf8',
                             backgroundColor: 'rgba(56, 189, 248, 0.12)',
                             borderWidth: 2.5,
-                            tension: 0.35,
+                            tension: 0.32,
                             fill: true,
-                            pointRadius: 3,
-                            pointHoverRadius: 5
+                            pointRadius: (c) => c.dataIndex === histLen - 1 ? 6 : 3.5,
+                            pointBackgroundColor: (c) => c.dataIndex === histLen - 1 ? '#10b981' : '#38bdf8',
+                            pointBorderColor: (c) => c.dataIndex === histLen - 1 ? '#ffffff' : '#38bdf8',
+                            pointHoverRadius: 6
                         },
                         {
-                            label: 'Dự phóng AI',
+                            label: 'Mục tiêu dự phóng AI',
                             data: foreSeries,
                             borderColor: '#c084fc',
                             borderDash: [6, 5],
                             borderWidth: 2.5,
-                            tension: 0.35,
+                            tension: 0.32,
                             fill: false,
-                            pointRadius: 3.5,
+                            pointRadius: 4,
                             pointBackgroundColor: '#c084fc'
                         },
                         {
-                            label: 'Biên trên tin cậy 90%',
+                            label: 'Vùng tối đa kỳ vọng (90%)',
                             data: upperBand,
-                            borderColor: 'rgba(192, 132, 252, 0.25)',
-                            backgroundColor: 'rgba(168, 85, 247, 0.12)',
+                            borderColor: 'rgba(192, 132, 252, 0.28)',
+                            backgroundColor: 'rgba(168, 85, 247, 0.13)',
                             borderWidth: 1,
                             pointRadius: 0,
-                            tension: 0.35,
+                            tension: 0.32,
                             fill: '+1'
                         },
                         {
-                            label: 'Biên dưới tin cậy 90%',
+                            label: 'Vùng tối thiểu kỳ vọng (90%)',
                             data: lowerBand,
-                            borderColor: 'rgba(192, 132, 252, 0.25)',
+                            borderColor: 'rgba(192, 132, 252, 0.28)',
                             borderWidth: 1,
                             pointRadius: 0,
-                            tension: 0.35,
+                            tension: 0.32,
                             fill: false
                         }
                     ]
@@ -2700,23 +2789,48 @@ Hãy trả lời bằng tiếng Việt rõ ràng, súc tích, có cấu trúc g�
                     plugins: {
                         legend: { display: false },
                         tooltip: {
-                            backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                            backgroundColor: 'rgba(15, 23, 42, 0.96)',
                             titleColor: '#f8fafc',
-                            bodyColor: '#cbd5e1',
-                            borderColor: 'rgba(56, 189, 248, 0.4)',
+                            bodyColor: '#e2e8f0',
+                            borderColor: 'rgba(56, 189, 248, 0.45)',
                             borderWidth: 1,
-                            padding: 10,
-                            filter: (item) => item.datasetIndex < 2 && item.raw !== null
+                            padding: 11,
+                            filter: (item) => item.datasetIndex < 2 && item.raw !== null,
+                            callbacks: {
+                                label: function (context) {
+                                    const val = context.raw;
+                                    if (val === null || val === undefined) return '';
+                                    if (asset.category === 'bonds' || asset.unit === '%') {
+                                        return `${context.dataset.label}: ${Number(val).toFixed(2)}%`;
+                                    }
+                                    const formatted = Number(val).toLocaleString('en-US', {
+                                        minimumFractionDigits: val < 10 ? 3 : (val % 1 === 0 ? 0 : 2),
+                                        maximumFractionDigits: val < 10 ? 3 : 2
+                                    });
+                                    const curr = state.globalCurrency === 'NATIVE' ? detectAssetBaseCurrency(asset) : state.globalCurrency;
+                                    return `${context.dataset.label}: ${formatted} ${curr}`;
+                                }
+                            }
                         }
                     },
                     scales: {
                         x: {
-                            grid: { color: 'rgba(51, 65, 85, 0.35)' },
-                            ticks: { color: '#94a3b8', font: { family: 'JetBrains Mono', size: 11 } }
+                            grid: { color: 'rgba(51, 65, 85, 0.3)' },
+                            ticks: { color: '#94a3b8', font: { family: 'JetBrains Mono', size: 10.5 } }
                         },
                         y: {
-                            grid: { color: 'rgba(51, 65, 85, 0.35)' },
-                            ticks: { color: '#94a3b8', font: { family: 'JetBrains Mono', size: 11 } }
+                            grace: '10%',
+                            grid: { color: 'rgba(51, 65, 85, 0.3)' },
+                            ticks: {
+                                color: '#94a3b8',
+                                font: { family: 'JetBrains Mono', size: 11 },
+                                callback: function (value) {
+                                    if (asset.category === 'bonds' || asset.unit === '%') return value.toFixed(2) + '%';
+                                    if (value >= 1000000) return (value / 1000000).toFixed(2) + 'M';
+                                    if (value >= 1000) return value.toLocaleString('en-US');
+                                    return Number(value).toFixed(value < 10 ? 3 : 2);
+                                }
+                            }
                         }
                     }
                 }
@@ -3461,14 +3575,15 @@ Trả về mảng JSON gồm đúng 3 phần tử bằng tiếng Việt sắc b�
                     }
                 };
 
-                const apiKey = "";
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
-                const res = await fetch(apiUrl, {
+                const res = await fetch('/api/gemini', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        contents: [{ parts: [{ text: prompt }] }],
-                        generationConfig: { responseMimeType: "application/json", responseSchema: schema }
+                        model: 'gemini-3-flash-preview',
+                        payload: {
+                            contents: [{ parts: [{ text: prompt }] }],
+                            generationConfig: { responseMimeType: "application/json", responseSchema: schema }
+                        }
                     })
                 });
 
