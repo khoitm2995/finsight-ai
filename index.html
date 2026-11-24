@@ -97,12 +97,13 @@
 
     <!-- Clean Sticky Header -->
     <header class="sticky top-0 z-40 bg-slate-950/90 backdrop-blur-xl border-b border-slate-800/80">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5">
-            <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-3.5">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+            <div class="flex flex-col gap-3">
+                <!-- Hàng 1: Logo & Bộ chuyển tiền tệ / Alpha Radar -->
                 <div class="flex flex-wrap items-center justify-between gap-3">
                     <!-- Brand Logo -->
                     <div class="flex items-center gap-2.5">
-                        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-500 to-purple-600 flex items-center justify-center text-white shadow-lg shadow-brand-500/25">
+                        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-500 to-purple-600 flex items-center justify-center text-white shadow-lg shadow-brand-500/25 shrink-0">
                             <i class="fa-solid fa-chart-line"></i>
                         </div>
                         <div>
@@ -114,7 +115,7 @@
                     </div>
 
                     <!-- Global Currency Switcher & Quick Nav -->
-                    <div class="flex items-center gap-2">
+                    <div class="flex flex-wrap items-center gap-2">
                         <div class="flex items-center bg-slate-900/95 border border-slate-700/80 rounded-xl px-2.5 py-1.5 gap-2">
                             <i class="fa-solid fa-coins text-amber-400 text-xs"></i>
                             <label for="global-currency-select" class="text-[11px] text-slate-400 hidden sm:inline">Tiền tệ:</label>
@@ -138,27 +139,30 @@
                     </div>
                 </div>
 
-                <!-- Category Filter Pills & Add Asset Button -->
-                <nav aria-label="Bộ lọc loại tài sản" class="flex items-center gap-1.5 overflow-x-auto pb-1 xl:pb-0 no-scrollbar">
-                    <button type="button" data-category="all" class="category-tab active px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium whitespace-nowrap transition-all bg-brand-500 text-white shadow-md shadow-brand-500/25 cursor-pointer">
-                        <i class="fa-solid fa-layer-group mr-1.5"></i>Tất cả
-                    </button>
-                    <button type="button" data-category="crypto" class="category-tab px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium whitespace-nowrap transition-all bg-slate-900/90 text-slate-300 hover:bg-slate-800 border border-slate-800 cursor-pointer">
-                        <i class="fa-brands fa-bitcoin text-amber-400 mr-1.5"></i>Tiền ảo
-                    </button>
-                    <button type="button" data-category="stocks" class="category-tab px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium whitespace-nowrap transition-all bg-slate-900/90 text-slate-300 hover:bg-slate-800 border border-slate-800 cursor-pointer">
-                        <i class="fa-solid fa-arrow-trend-up text-emerald-400 mr-1.5"></i>Chứng khoán & Cổ phiếu
-                    </button>
-                    <button type="button" data-category="bonds" class="category-tab px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium whitespace-nowrap transition-all bg-slate-900/90 text-slate-300 hover:bg-slate-800 border border-slate-800 cursor-pointer">
-                        <i class="fa-solid fa-landmark text-sky-400 mr-1.5"></i>Trái phiếu
-                    </button>
-                    <button type="button" data-category="gold" class="category-tab px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium whitespace-nowrap transition-all bg-slate-900/90 text-slate-300 hover:bg-slate-800 border border-slate-800 cursor-pointer">
-                        <i class="fa-solid fa-coins text-yellow-400 mr-1.5"></i>Giá vàng
-                    </button>
-                    <button type="button" onclick="openAddAssetModal()" class="ml-1 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 shadow-md shadow-emerald-500/25 flex items-center gap-1.5 cursor-pointer">
+                <!-- Hàng 2: Thanh bộ lọc tài sản & Nút Thêm mã mới -->
+                <div class="flex flex-wrap items-center justify-between gap-2 pt-2.5 border-t border-slate-800/70">
+                    <nav aria-label="Bộ lọc loại tài sản" class="flex flex-wrap items-center gap-1.5">
+                        <button type="button" data-category="all" class="category-tab active px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium whitespace-nowrap transition-all bg-brand-500 text-white shadow-md shadow-brand-500/25 cursor-pointer">
+                            <i class="fa-solid fa-layer-group mr-1.5"></i>Tất cả
+                        </button>
+                        <button type="button" data-category="crypto" class="category-tab px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium whitespace-nowrap transition-all bg-slate-900/90 text-slate-300 hover:bg-slate-800 border border-slate-800 cursor-pointer">
+                            <i class="fa-brands fa-bitcoin text-amber-400 mr-1.5"></i>Tiền ảo
+                        </button>
+                        <button type="button" data-category="stocks" class="category-tab px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium whitespace-nowrap transition-all bg-slate-900/90 text-slate-300 hover:bg-slate-800 border border-slate-800 cursor-pointer">
+                            <i class="fa-solid fa-arrow-trend-up text-emerald-400 mr-1.5"></i>Chứng khoán & Cổ phiếu
+                        </button>
+                        <button type="button" data-category="bonds" class="category-tab px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium whitespace-nowrap transition-all bg-slate-900/90 text-slate-300 hover:bg-slate-800 border border-slate-800 cursor-pointer">
+                            <i class="fa-solid fa-landmark text-sky-400 mr-1.5"></i>Trái phiếu
+                        </button>
+                        <button type="button" data-category="gold" class="category-tab px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium whitespace-nowrap transition-all bg-slate-900/90 text-slate-300 hover:bg-slate-800 border border-slate-800 cursor-pointer">
+                            <i class="fa-solid fa-coins text-yellow-400 mr-1.5"></i>Giá vàng
+                        </button>
+                    </nav>
+
+                    <button type="button" onclick="openAddAssetModal()" class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 shadow-md shadow-emerald-500/25 flex items-center gap-1.5 shrink-0 cursor-pointer">
                         <i class="fa-solid fa-plus"></i>Thêm mã mới
                     </button>
-                </nav>
+                </div>
             </div>
         </div>
     </header>
