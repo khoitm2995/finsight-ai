@@ -1027,14 +1027,6 @@
                 rsi: '61.4 (Trung tính-Tăng)', maTrend: 'Trên MA50 & MA200', volatility: 'Trung bình - Cao (3.8%)',
                 support: '$89,500', resistance: '$98,800',
                 horizons: {
-                    '24h': {
-                        label: '24 Giờ tới', bullProb: 64, targetFormatted: formatVal(roundVal(finalPrice * 1.012)), upside: '+1.20%',
-                        history: [0.988, 0.991, 0.994, 0.992, 0.996, 0.998, 1].map(m => roundVal(finalPrice * m)),
-                        forecast: [1.002, 1.004, 1.006, 1.008, 1.010, 1.012].map(m => roundVal(finalPrice * m)),
-                        tech: `Biến động trong 24 giờ của ${cleanTicker} duy trì ổn định quanh vùng cân bằng ngắn hạn.`,
-                        macro: note ? `Luận điểm trọng tâm: ${note}` : `Thanh khoản ngắn hạn của nhóm ${categoryMeta.label} duy trì ổn định.`,
-                        scenario: `Theo dõi phản ứng giá quanh vùng hỗ trợ ngắn hạn <strong class="text-white">${formatVal(roundVal(finalPrice * 0.985))}</strong>.`
-                    },
                     '7d': {
                         label: '7 Ngày tới', bullProb: 74, targetFormatted: '$97,800', upside: '+3.77%',
                         history: [88400, 89900, 91200, 90800, 92400, 93500, 94250],
@@ -2058,6 +2050,14 @@
                 support: formatVal(roundVal(finalPrice * 0.94)),
                 resistance: formatVal(roundVal(finalPrice * 1.08)),
                 horizons: {
+                    '24h': {
+                        label: '24 Giờ tới', bullProb: 64, targetFormatted: formatVal(roundVal(finalPrice * 1.012)), upside: '+1.20%',
+                        history: [0.988, 0.991, 0.994, 0.992, 0.996, 0.998, 1].map(m => roundVal(finalPrice * m)),
+                        forecast: [1.002, 1.004, 1.006, 1.008, 1.010, 1.012].map(m => roundVal(finalPrice * m)),
+                        tech: `Biến động trong 24 giờ của ${cleanTicker} duy trì ổn định quanh vùng cân bằng ngắn hạn.`,
+                        macro: note ? `Luận điểm trọng tâm: ${note}` : `Thanh khoản ngắn hạn của nhóm ${categoryMeta.label} duy trì ổn định.`,
+                        scenario: `Theo dõi phản ứng giá quanh vùng hỗ trợ ngắn hạn <strong class="text-white">${formatVal(roundVal(finalPrice * 0.985))}</strong>.`
+                    },
                     '7d': {
                         label: '7 Ngày tới', bullProb: 72, targetFormatted: formatVal(f7[f7.length - 1]), upside: '+4.50%',
                         history: h7, forecast: f7,
